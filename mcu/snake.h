@@ -16,16 +16,16 @@
       the documentation and/or other materials provided with the
       distribution.
    3. All advertising materials mentioning features or use of this software
-      or firmware must display the following acknowledgement: 
+      or firmware must display the following acknowledgement:
 
         This product includes software developed by the University of
-        Technology, Faculty of Information Technology, Brno and its 
-        contributors. 
+        Technology, Faculty of Information Technology, Brno and its
+        contributors.
 
    4. Neither the name of the Company nor the names of its contributors
       may be used to endorse or promote products derived from this
       software without specific prior written permission.
- 
+
    This software is provided ``as is'', and any express or implied
    warranties, including, but not limited to, the implied warranties of
    merchantability and fitness for a particular purpose are disclaimed.
@@ -37,7 +37,7 @@
    in contract, strict liability, or tort (including negligence or
    otherwise) arising in any way out of the use of this software, even
    if advised of the possibility of such damage.
-   
+
    $Id$
 
 *******************************************************************************/
@@ -45,9 +45,13 @@
 #ifndef _SNAKE_H_
 #define _SNAKE_H_
 
+// rozmery displeja
+#define VGA_COLUMNS 8
+#define VGA_ROWS    8
+
 // had
-#define INIT_SNAKE_LENGTH 15              // pocatecni delka hada
-#define MAX_SNAKE_STRUCT_LENGTH 400              // maximalni delka struktury hada
+#define INIT_SNAKE_LENGTH 4             // pocatecni delka hada
+#define MAX_SNAKE_STRUCT_LENGTH 64             // maximalni delka struktury hada
 #define INC_SNAKE_I(index) ((index == (MAX_SNAKE_STRUCT_LENGTH - 1)) ? (index = 0) : (index++))
 #define DEC_SNAKE_I(index) ((index == 0) ? (index = (MAX_SNAKE_STRUCT_LENGTH - 1)) : (index--))
 typedef unsigned int snake_t;
@@ -55,7 +59,7 @@ snake_t *snake;
 unsigned int snake_struct_length;     // pocitadlo velikosti struktury hada
 unsigned int snake_head_i;            // kde ja zacatek
 unsigned int snake_tail_i;            // kde je konec
-#define SNAKE_EXTEND_STEP 5               // o kolik se prodlouzi had pri papani
+#define SNAKE_EXTEND_STEP 1               // o kolik se prodlouzi had pri papani
 unsigned int snake_extend;            // o kolik bude jeste prodlouzeny had
 
 // zakodovani smeru
@@ -65,19 +69,19 @@ unsigned int snake_extend;            // o kolik bude jeste prodlouzeny had
 #define D_LEFT 3
 
 // pocatecni souradnice hada a smer
-#define BEGIN_X 40
-#define BEGIN_Y 30
+#define BEGIN_X 4
+#define BEGIN_Y 4
 #define BEGIN_D D_RIGHT
 
 // souradnice leveho a praveho sloupce hraci plochy
-#define MIN_X 1
-#define MAX_X VGA_COLUMNS-2
+#define MIN_X 0
+#define MAX_X VGA_COLUMNS-1
 #define X_LEFT(x)  (((x) != MIN_X) ? ((x) - 1) : MAX_X)
 #define X_RIGHT(x) (((x) != MAX_X) ? ((x) + 1) : MIN_X)
 
 // souradnice hodniho a spodniho radku plochy
-#define MIN_Y 1
-#define MAX_Y VGA_ROWS-2
+#define MIN_Y 0
+#define MAX_Y VGA_ROWS-1
 #define Y_UP(y)   (((y) != MIN_Y) ? ((y) - 1) : MAX_Y)
 #define Y_DOWN(y) (((y) != MAX_Y) ? ((y) + 1) : MIN_Y)
 
@@ -106,7 +110,7 @@ void snake_cut_tail();
 // porovna souradnici s telem hada
 unsigned short is_snake_body(unsigned char x, unsigned char y);
 
-unsigned char yummy_x, yummy_y;         // souradnice mnamky
+unsigned char yummy_x[4], yummy_y[4];         // souradnice mnamky
 
 // vygeneruje souradnice papani
 void gen_yummy(unsigned char *x, unsigned char *y);
@@ -114,4 +118,3 @@ void gen_yummy(unsigned char *x, unsigned char *y);
 unsigned short is_yummy(unsigned char x, unsigned char y);
 
 #endif  // _SNAKE_H_
-

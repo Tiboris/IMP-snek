@@ -253,20 +253,34 @@ unsigned short is_snake_body(unsigned char x, unsigned char y) {
 // vygeneruje souradnice mnamky
 void gen_yummy(unsigned char *x, unsigned char *y) {
 
-  unsigned char ax, ay;
-  int i;
-  for (i = 0; i < 4; i++) {
-      do {
-        ax = (((unsigned) rand() & 0x00ff) % ((VGA_COLUMNS) - 2)) + 1;
-        ay = (((unsigned) rand() & 0x00ff) % ((VGA_ROWS) - 2)) + 1;
-      } while (is_snake_body(ax, ay));
-      x[i] = yummy_x[i] = ax;
-      y[i] = yummy_y[i] = ay;
-  }
+   unsigned char ax, ay;
+   int i;
+   for (i = 0; i < 4; i++)
+   {
+       do
+       {
+           ax = (((unsigned) rand() & 0x00ff) % ((VGA_COLUMNS)));
+           ay = (((unsigned) rand() & 0x00ff) % ((VGA_ROWS)));
+       } while (is_snake_body(ax, ay));
+
+       x[i] = yummy_x[i] = ax;
+       y[i] = yummy_y[i] = ay;
+   }
 }
 
 // vrati 1, pokud bylo neco ke snedku
 unsigned short is_yummy(unsigned char x, unsigned char y) {
+    int i;
+    for (i = 0; i < 4; i++)
+    {
+        if ((x == yummy_x[i]) && (y == yummy_y[i]))
+        {
+            yummy_x[i] = 21; // ak spapa tak zmenim suradnice ...
+            yummy_y[i] = 21; // mimo rozsah aby nepapal znova to co zjedol
+            return 1;
+        }
+    }
+    return 0;
 
-  return (x == yummy_x) && (y == yummy_y);
+
 }

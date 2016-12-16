@@ -1,20 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <project fitkitversion="1.0" outputprefix="snake">
 
 	<!--  Project description -->
-	<name>Hra had povodna</name>
-	<author>Zdeněk Vašíček, Karel Slaný</author>
-	<authoremail>vasicek@fit.vutbr.cz</authoremail>
-	<revision>20090201</revision>
-    <description>Hru had je možné ovládat pomocí klávesnice, hrací plocha je zobrazována na monitoru, který je nutné připojit k rozhraní VGA.</description>
+	<name>Hra šnek</name>
+	<author>Tibor Dudlák, Zdeněk Vašíček, Karel Slaný</author>
+	<authoremail></authoremail>
+	<revision>20161216</revision>
+    <description>Hru had je možné ovládať pomocou klávesnice, hracia plocha je zobrazovaná na LED displeji 8x8 (BM-10EG88MD) , ktorý je nutné pripojit k JP9 podľa dokumentácie.</description>
 
-    <!--  MCU part --> 
+    <!--  MCU part -->
 	<mcu>
         <include>mcu/libs/lcd/package.xml</include>
         <include>mcu/libs/thermometer/package.xml</include>
 
 		<file>snake.c</file>
-		<file>vga_block.c</file>
 		<file>keyboard.c</file>
 		<files>main.c</files>
 	</mcu>

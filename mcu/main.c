@@ -4,6 +4,7 @@
                       Faculty of Information Technology
    Author(s): Zdenek Vasicek <vasicek AT fit.vutbr.cz>
               Karel Slany    <slany AT fit.vutbr.cz>
+              Tibor Dudlák   <xdudla00 AT fit.vutbr.cz>
 
    LICENSE TERMS
 
@@ -17,16 +18,16 @@
       the documentation and/or other materials provided with the
       distribution.
    3. All advertising materials mentioning features or use of this software
-      or firmware must display the following acknowledgement: 
+      or firmware must display the following acknowledgement:
 
         This product includes software developed by the University of
-        Technology, Faculty of Information Technology, Brno and its 
-        contributors. 
+        Technology, Faculty of Information Technology, Brno and its
+        contributors.
 
    4. Neither the name of the Company nor the names of its contributors
       may be used to endorse or promote products derived from this
       software without specific prior written permission.
- 
+
    This software is provided ``as is'', and any express or implied
    warranties, including, but not limited to, the implied warranties of
    merchantability and fitness for a particular purpose are disclaimed.
@@ -38,7 +39,7 @@
    in contract, strict liability, or tort (including negligence or
    otherwise) arising in any way out of the use of this software, even
    if advised of the possibility of such damage.
-   
+
    $Id$
 
 *******************************************************************************/
@@ -49,7 +50,6 @@
 #include <string.h>
 #include <thermometer/thermometer.h>
 #include <lcd/display.h>
-#include "vga_block.h"
 #include "keyboard.h"
 #include "snake.h"
 
@@ -72,7 +72,30 @@ unsigned int ccr0_delay = CCR_INIT; // perioda
 unsigned short started = 0;
 
 /*******************************************************************************
- * Vypis uzivatelske napovedy (funkce se vola pri vykonavani prikazu "help") 
+ * Nastavenie a Vysvietenie LED
+*******************************************************************************/
+unsigned char row[8]={0};
+
+void setLEDxy(unsigned char x, unsigned char y, int set) {
+    if (set) {
+        row[y] |= (1 << x);
+    } else {
+        row[y] &= ~(1 << x);
+    }
+}
+
+void lightLED() {
+    unsigned char i = 0;
+    for (i = 0; i < 8; i++) {
+        P4OUT = row[i] & 0x3f;
+        P1OUT = row[i] & 0xc0;
+        P6OUT = ~(1<<i);
+        delay_ms(1);
+    }
+}
+
+/*******************************************************************************
+ * Vypis uzivatelske napovedy (funkce se vola pri vykonavani prikazu "help")
 *******************************************************************************/
 void print_user_help(void)
 {
@@ -86,34 +109,19 @@ void print_user_help(void)
 *******************************************************************************/
 unsigned char decode_user_cmd(char *cmd_ucase, char *cmd)
 {
-  
-  if (strcmp4(cmd_ucase,"VGA ")) {
-     if (strcmp(cmd_ucase+4, "CLEAR") == 0) {
-       VGA_Clear();
-       return (USER_COMMAND);
-     }
-     
-     switch (cmd_ucase[4]) {
-        case '0': VGA_SetPixel(0); return (USER_COMMAND); break;
-        case '1': VGA_SetPixel(1); return (USER_COMMAND); break;
-        case '2': VGA_SetPixel(2); return (USER_COMMAND); break;
-        case '3': VGA_SetPixel(3); return (USER_COMMAND); break;
-     }
-  }
-
   return (CMD_UNKNOWN);
 }
 
 /*******************************************************************************
  * Inicializace struktur a hada
  *******************************************************************************/
-void snake_init_structs(void) 
+void snake_init_structs(void)
 {
   int i;
 
   if (snake != NULL)
      return;
-  
+
   // inicializace poc. souradnic, smeru
   actual_x = BEGIN_X;
   actual_y = BEGIN_Y;
@@ -122,37 +130,25 @@ void snake_init_structs(void)
 
   //inicializace indexu do struktury
   snake_struct_length = 0;
-  snake_head_i = 0; 
-  snake_tail_i = 0; 
-  snake_extend = 0;       
+  snake_head_i = 0;
+  snake_tail_i = 0;
+  snake_extend = 0;
 
   // alokace struktury
   snake = malloc(sizeof(snake_t)*MAX_SNAKE_STRUCT_LENGTH);
-  if (snake != NULL) 
+  if (snake != NULL)
   {
-     for (i = 0; i < INIT_SNAKE_LENGTH; i++) 
+     for (i = 0; i < INIT_SNAKE_LENGTH; i++)
      {
          snake_add_head(actual_x - INIT_SNAKE_LENGTH + i + 1, actual_y, actual_d);
          // vykresleni hada (pocatecni pozice)
-         VGA_SetPixelXY(actual_x - INIT_SNAKE_LENGTH + i + 1, actual_y, 2);
+        //  VGA_SetPixelXY(actual_x - INIT_SNAKE_LENGTH + i + 1, actual_y, 2);
+         setLEDxy(actual_x - INIT_SNAKE_LENGTH + i + 1, actual_y, 2);
      }
-  } 
-  else 
+  }
+  else
   {
      term_send_str_crlf("Chyba alokace pameti");
-  }
-}
-
-/*******************************************************************************
- * Uvolneni alokovane pameti
-*******************************************************************************/
-void CB_FPGA_before_prog(void) 
-{ 
-  //Uvolneni struktur kvuli XMODEMu, ktery potrebuje 1kB RAM
-  //jiz neni nutne (XMODEM byl nahrazen)
-  if (snake != NULL) {
-     free(snake);
-     snake = NULL;
   }
 }
 
@@ -164,7 +160,7 @@ void fpga_initialized(void)
   LCD_init();
   LCD_write_string("Snake ...");
 
-  VRAM_Init(); //incializace VGA
+  // VRAM_Init(); //incializace VGA
   snake_init_structs(); //inicializace struktur
 }
 
@@ -173,15 +169,16 @@ void fpga_initialized(void)
 *******************************************************************************/
 interrupt (TIMERA0_VECTOR) Timer_A (void) {
   //po kolika ticich (16384 = 0x4000, tj. za 1/2 s) ma dojit k dalsimu preruseni
-  CCR0 += ccr0_delay; 
+  CCR0 += ccr0_delay;
   //nastalo preruseni - nastavit vlajku
   flag_int++;
 }
 
+
 /*******************************************************************************
  * Hlavni funkce
 *******************************************************************************/
-int main(void) 
+int main(void)
 {
   unsigned char ax, ay, ad; // pomocne
   unsigned int score = 0;
@@ -194,16 +191,21 @@ int main(void)
   thermometer_init_rand();    //inicializace generatoru nah. cisel
 
   set_led_d6(1);              // rozsviceni D6
-  set_led_d5(1);              // rozsviceni D5  
- 
+  set_led_d5(1);              // rozsviceni D5
+
   WDG_stop();                // zastav watchdog
 
-  while (1)  
+  P6DIR = 0xff;
+  P4DIR |= 0x3f;
+  P1DIR |= 0xc0;
+
+  while (1)
   {
-    terminal_idle_cb(&CB_FPGA_before_prog); // obsluha terminalu
+    terminal_idle(); // obsluha terminalu
+    lightLED();
 
     // preklad z prikazu klavesnice na novy smer
-    switch (kbstate()) 
+    switch (kbstate())
     {
       case CMD_UP :
         if (actual_d != D_DOWN)
@@ -239,14 +241,14 @@ int main(void)
     }
 
     //rizeni hada
-    if ((started) && (flag_int > 0)) 
+    if ((started) && (flag_int > 0))
     {
        flag_int--;
 
        // vypocet nove pozice z aktualniho smeru a pozice
-       switch (next_d) 
+       switch (next_d)
        {
-         case D_UP : 
+         case D_UP :
            next_x = actual_x;
            next_y = Y_UP(actual_y);
            break;
@@ -267,30 +269,34 @@ int main(void)
        }
 
        //vygenerovani jidla
-       if (!yummy_present) 
+       if (!yummy_present)
        {
-          gen_yummy(&ax, &ay);
-          VGA_SetPixelXY(ax, ay, 3);
-          yummy_present = 1;
+           unsigned char ax[4], ay[4];
+           gen_yummy(ax, ay);
+           int i = 0;
+           for (i = 0; i < 4; i++) {
+               setLEDxy(ax[i],ay[i],3);
+               yummy_present++;
+           }
        }
- 
+
        //posun hada
-       if (is_snake_body(next_x, next_y)) 
+       if (is_snake_body(next_x, next_y))
        {
           //had narazil - konec hry
           CCTL0 = 0; //zastavit preruseni
           started = 0;
           sprintf(result, "SCORE: %d", score);
           LCD_write_string(result); // zobrazeni skore
-       } 
-       else 
+       }
+       else
        {
-          if (is_yummy(next_x, next_y)) 
+          if (is_yummy(next_x, next_y))
           {
              // bude se prodluzovat
              snake_extend += SNAKE_EXTEND_STEP;
              // bylo spapano
-             yummy_present = 0;
+             yummy_present--;
              // vypise se nove skore
              score++;
              sprintf(result, "Score: %d", score);
@@ -300,28 +306,27 @@ int main(void)
              if (ccr0_delay < CCR_MIN)
                ccr0_delay = CCR_MIN;
           }
-           
-          if (!snake_extend) 
+
+          if (!snake_extend)
           {
              // zrusi konec hada
              snake_get_tail(&ax, &ay, &ad);
              snake_cut_tail();
-             VGA_SetPixelXY(ax, ay, 0);
-          } 
-          else 
+             setLEDxy(ax, ay, 0);
+          }
+          else
           {
              snake_extend--;
           }
-     
+
           // vykresli dalsi pixel
           snake_add_head(next_x, next_y, next_d);
-          VGA_SetPixelXY(actual_x, actual_y, 2);
-          VGA_SetPixelXY(next_x, next_y, 3);
-     
+          setLEDxy(actual_x, actual_y, 2);
+          setLEDxy(next_x, next_y, 3);
           actual_x = next_x;
           actual_y = next_y;
           actual_d = next_d;
       }
     }
-  }  
-} 
+  }
+}
