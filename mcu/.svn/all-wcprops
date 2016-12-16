@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu
+END
+keyboard.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu/keyboard.c
+END
+snake.c
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu/snake.c
+END
+main.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu/main.c
+END
+keyboard.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu/keyboard.h
+END
+snake.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu/snake.h
+END
+vga_block.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu/vga_block.c
+END
+vga_block.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/FITkit/!svn/ver/284/trunk/apps/games/snake/mcu/vga_block.h
+END
